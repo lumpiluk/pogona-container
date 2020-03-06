@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-sudo singularity build cases.simg Singularity
+sudo singularity build pogona-container_latest.sif Singularity
