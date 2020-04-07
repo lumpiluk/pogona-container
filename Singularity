@@ -110,6 +110,7 @@ From: openfoamplus/of_v1912_centos73
     # Install individual additional packages (saves a lot of diskspace compared to using the next 'level' of `install-tl`):
     tlmgr install csquotes
     tlmgr install ucs  # for utf8x.def, expected by Matplotlib
+    tlmgr install type1cm  # sometimes expected by Matplotlib
     tlmgr install pgf xcolor
 
     # Cleanup
