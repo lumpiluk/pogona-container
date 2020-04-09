@@ -20,12 +20,6 @@ From: openfoamplus/of_v1912_centos73
     # source /opt/OpenFOAM/setImage_v1906.sh
     PYENV_ROOT=/opt/pyenv
     PATH=$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
-    # The following is required for Qt applications such as ParaView
-    # to accept keyboard inputs.
-    # You may have to run the container with
-    # `singularity shell -B /usr/share/X11/xkb cases.simg`.
-    # For details, see https://sylabs.io/guides/3.0/user-guide/bind_paths_and_mounts.html
-    QT_XKB_CONFIG_ROOT=/usr/share/X11/xkb:$QT_XKB_CONFIG_ROOT
 
 %post
     # IMPORTANT: Avoid chaining commands with `&&` as this may cause %post to fail silently!
@@ -110,8 +104,15 @@ From: openfoamplus/of_v1912_centos73
     # Install individual additional packages (saves a lot of diskspace compared to using the next 'level' of `install-tl`):
     tlmgr install csquotes
     tlmgr install ucs  # for utf8x.def, expected by Matplotlib
-    tlmgr install type1cm type1ec  # sometimes expected by Matplotlib
+    tlmgr install type1cm cm-super dvipng  # sometimes expected by Matplotlib
     tlmgr install pgf xcolor
+
+    # The following is required for Qt applications such as ParaView
+    # to accept keyboard inputs.
+    # You may have to run the container with
+    # `singularity shell -B /usr/share/X11/xkb cases.simg`.
+    # For details, see https://sylabs.io/guides/3.0/user-guide/bind_paths_and_mounts.html
+    echo 'QT_XKB_CONFIG_ROOT=/usr/share/X11/xkb:$QT_XKB_CONFIG_ROOT' >> $SINGULARITY_ENVIRONMENT
 
     # Cleanup
     yum clean all
