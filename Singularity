@@ -112,7 +112,7 @@ From: openfoamplus/of_v1912_centos73
     # You may have to run the container with
     # `singularity shell -B /usr/share/X11/xkb cases.simg`.
     # For details, see https://sylabs.io/guides/3.0/user-guide/bind_paths_and_mounts.html
-    echo 'QT_XKB_CONFIG_ROOT=/usr/share/X11/xkb:$QT_XKB_CONFIG_ROOT' >> $SINGULARITY_ENVIRONMENT
+    echo 'export QT_XKB_CONFIG_ROOT=/usr/share/X11/xkb:$QT_XKB_CONFIG_ROOT' >> $SINGULARITY_ENVIRONMENT
 
     # Cleanup
     yum clean all
