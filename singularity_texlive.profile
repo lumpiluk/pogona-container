@@ -1,14 +1,14 @@
-# texlive.profile written on Thu Mar  5 09:01:58 2020 UTC
+# texlive.profile written on Fri Apr 23 09:41:51 2021 UTC
 # It will NOT be updated and reflects only the
 # installation profile at installation time.
 selected_scheme scheme-basic
 TEXDIR /usr/local/texlive
-TEXMFCONFIG ~/.texlive/2019/texmf-config
-TEXMFHOME ~/.texlive/texmf
+TEXMFCONFIG ~/.texlive2021/texmf-config
+TEXMFHOME ~/texmf
 TEXMFLOCAL /usr/local/texlive/texmf-local
 TEXMFSYSCONFIG /usr/local/texlive/texmf-config
 TEXMFSYSVAR /usr/local/texlive/texmf-var
-TEXMFVAR ~/.texlive/2019/texmf-var
+TEXMFVAR ~/.texlive2021/texmf-var
 binary_x86_64-linux 1
 instopt_adjustpath 0
 instopt_adjustrepo 1
@@ -28,4 +28,3 @@ tlpdbopt_sys_bin /usr/local/bin
 tlpdbopt_sys_info /usr/local/share/info
 tlpdbopt_sys_man /usr/local/share/man
 tlpdbopt_w32_multi_user 1
-

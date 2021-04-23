@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: openfoamplus/of_v1912_centos73
+From: openfoamplus/of_v2012_centos73:release
 
 %setup
     # Nothing to be done here.
@@ -14,10 +14,10 @@ From: openfoamplus/of_v1912_centos73
     # "scheme-basic"), then choose the option to just save the profile to `texlive.profile`.
     # IMPORTANT: Don't forget to edit the file to make the paths match the
     # expectations in %post below, and to make them work with Singularity!
-    singularity_texlive.profile /tmp/texlive.profile
+    singularity_texlive.profile /texlive.profile
 
 %environment
-    # source /opt/OpenFOAM/setImage_v1906.sh
+    # source /opt/openfoam/setEnv.sh
     PYENV_ROOT=/opt/pyenv
     PATH=$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
 
@@ -31,6 +31,10 @@ From: openfoamplus/of_v1912_centos73
     # Using this tutorial: https://www.tecmint.com/pyenv-install-and-manage-multiple-python-versions-in-linux/
     # Using this Github Gist: https://gist.github.com/jprjr/7667947
     # Also see "Suggested build environment" here: https://github.com/pyenv/pyenv/wiki
+
+    # Ensure this file exists, because Texlive installation tends to fail often
+    # for various reasons, one being that this file is not readable:
+    cat /texlive.profile
 
     # Pyenv requirements:
     yum install -y epel-release
@@ -78,23 +82,25 @@ From: openfoamplus/of_v1912_centos73
     # Cflags for python compilation with pyenv (see their wiki):
     export CFLAGS="-O2"
 
-    pyenv install 3.8.2
-    pyenv global 3.8.2
+    pyenv install 3.9.3
+    pyenv global 3.9.3
     pyenv rehash
     python3 --version
     python3 -m ensurepip --upgrade
     pip3 install pipenv numpy scipy pandas
 
-    echo 'source /opt/OpenFOAM/setImage_v1912.sh' >> $SINGULARITY_ENVIRONMENT
+    # OpenFoam's setEnv.sh script assumes /etc/bashrc to exist, so create it:
+    touch /etc/bashrc
+    echo 'source /opt/openfoam/setEnv.sh' >> $SINGULARITY_ENVIRONMENT
 
     # Install Texlive
     # Based on https://github.com/zimmerst/centos-texlive/blob/master/Dockerfile
     yum -y install perl-Digest-MD5 wget poppler-utils
-    curl -o /tmp/install-tl-unx.tar.gz http://ftp.acc.umu.se/mirror/CTAN/systems/texlive/tlnet/install-tl-unx.tar.gz
+    curl -o /tmp/install-tl-unx.tar.gz ftp://ftp.fu-berlin.de/tex/CTAN/systems/texlive/tlnet/install-tl-unx.tar.gz
     cd /tmp/
     tar xzf install-tl-unx.tar.gz
     rm install-tl-unx.tar.gz
-    bash -c "cd /tmp/install-tl-* && ./install-tl -profile /tmp/texlive.profile -no-verify-downloads -persistent-downloads"
+    bash -c "cd /tmp/install-tl-* && ./install-tl -profile /texlive.profile -no-verify-downloads -persistent-downloads"
 
     echo 'export PATH=/usr/local/texlive/bin/x86_64-linux:$PATH' >> $SINGULARITY_ENVIRONMENT
     echo 'export MANPATH=/usr/local/texlive/texmf-dist/doc/man:$MANPATH' >> $SINGULARITY_ENVIRONMENT
