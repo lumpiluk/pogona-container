@@ -144,7 +144,7 @@ From: openfoamplus/of_v2012_centos73:release
     #  singularity instance start cases.sif my-cases-instance
     echo "Startscript"
 
-%test
+# %test
 
 %labels
     Author ccs-labs.org
