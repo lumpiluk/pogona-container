@@ -5,6 +5,14 @@ Singularity container definition for the upcoming Pogona simulator
 
 ## Usage
 
+To build the container image, install Singularity – now called [https://apptainer.org/](Apptainer)? – and run the following command:
+
+```bash
+./singularity_build.sh
+```
+
+**WARNING**: Singularity-hub has been discontinued and only an archived version of the singularity container is still available with the command below. Unfortunately, newer versions of OpenFoam appear to be incompatible with our OpenFoam simulation cases for the Pogona simulator for unknown reasons. Please follow the instructions above to build a compatible version 1912 container.
+
 To use a pre-built image, first pull it from Singularity Hub:
 
 ```bash
