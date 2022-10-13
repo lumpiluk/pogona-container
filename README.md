@@ -5,7 +5,7 @@ Singularity container definition for the upcoming Pogona simulator
 
 ## Usage
 
-To build the container image, install Singularity – now called [https://apptainer.org/](Apptainer)? – and run the following command:
+To build the container image, install Singularity – now called [Apptainer](https://apptainer.org/)? – and run the following command:
 
 ```bash
 ./singularity_build.sh
