@@ -25,4 +25,4 @@ Afterwards, you can open a subshell using the image by running
 ./singularity_shell.sh
 ```
 
-From there, all prerequisites for running OpenFOAM simulations or setting up a Python Pipenv/Virtualenv for the Pogona simulator should be available.
+From there, all prerequisites for running OpenFOAM simulations should be available.
