@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: openfoamplus/of_v2012_centos73:release
+From: openfoamplus/of_v1912_centos73
 
 %setup
     # Nothing to be done here.
@@ -14,10 +14,10 @@ From: openfoamplus/of_v2012_centos73:release
     # "scheme-basic"), then choose the option to just save the profile to `texlive.profile`.
     # IMPORTANT: Don't forget to edit the file to make the paths match the
     # expectations in %post below, and to make them work with Singularity!
-    singularity_texlive.profile /texlive.profile
+    singularity_texlive.profile /tmp/texlive.profile
 
 %environment
-    # source /opt/openfoam/setEnv.sh
+    # source /opt/OpenFOAM/setImage_v1906.sh
     PYENV_ROOT=/opt/pyenv
     PATH=$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
 
@@ -32,10 +32,6 @@ From: openfoamplus/of_v2012_centos73:release
     # Using this Github Gist: https://gist.github.com/jprjr/7667947
     # Also see "Suggested build environment" here: https://github.com/pyenv/pyenv/wiki
 
-    # Ensure this file exists, because Texlive installation tends to fail often
-    # for various reasons, one being that this file is not readable:
-    cat /texlive.profile
-
     # Pyenv requirements:
     yum install -y epel-release
     yum install -y \
@@ -48,7 +44,10 @@ From: openfoamplus/of_v2012_centos73:release
         openssl-devel \
         tk-devel \
         xz-devel \
-        libffi-devel
+        libffi-devel \
+        gcc-gfortran \
+        cmake3 \
+        openblas
 
     # For Snakemake for Python 3.8 we currently need libdatrie-devel
     #  because Snakemake depends on datrie, which currently doesn't officially support Python 3.8.
@@ -61,57 +60,55 @@ From: openfoamplus/of_v2012_centos73:release
     # We need to build libdatrie ourselves as it isn't available in CentOS 7…
     # No helpful readme with build instructions, so copying from Arch:
     #  https://git.archlinux.org/svntogit/packages.git/tree/trunk/PKGBUILD?h=packages/libdatrie
-    git clone https://github.com/tlwg/libdatrie.git /opt/libdatrie
-    cd /opt/libdatrie
-    ./autogen.sh
-    ./configure --prefix=/usr --disable-static
-    make
-    make install
-    # Add /usr/lib to $LD_LIBRARY_PATH so libdatrie.so.1 can be found after installation
-    # (https://stackoverflow.com/questions/1099981/why-cant-python-find-shared-objects-that-are-in-directories-in-sys-path/1100016#1100016):
-    echo "export LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH" >> $SINGULARITY_ENVIRONMENT
+#     git clone --depth 1 --branch "v0.2.13" https://github.com/tlwg/libdatrie.git /opt/libdatrie
+#     cd /opt/libdatrie
+#     ./autogen.sh
+#     ./configure --prefix=/usr --disable-static
+#     make
+#     make install
+#     # Add /usr/lib to $LD_LIBRARY_PATH so libdatrie.so.1 can be found after installation
+#     # (https://stackoverflow.com/questions/1099981/why-cant-python-find-shared-objects-that-are-in-directories-in-sys-path/1100016#1100016):
+#     echo "export LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH" >> $SINGULARITY_ENVIRONMENT
 
     yum install -y vim
     # For Snakemake visualizations:
-    yum install -y graphviz-devel
+#     yum install -y graphviz-devel
 
-    git clone https://github.com/pyenv/pyenv.git /opt/pyenv
+#     git clone https://github.com/pyenv/pyenv.git /opt/pyenv
+# 
+#     export PYENV_ROOT=/opt/pyenv
+#     export PATH=$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
+#     # Cflags for python compilation with pyenv (see their wiki):
+#     export CFLAGS="-O2"
+# 
+#     pyenv install 3.8.2
+#     pyenv global 3.8.2
+#     pyenv rehash
+#     python3 --version
+#     python3 -m ensurepip --upgrade
+#     pip3 install pipenv numpy scipy pandas
 
-    export PYENV_ROOT=/opt/pyenv
-    export PATH=$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
-    # Cflags for python compilation with pyenv (see their wiki):
-    export CFLAGS="-O2"
+    echo 'source /opt/OpenFOAM/setImage_v1912.sh' >> $SINGULARITY_ENVIRONMENT
 
-    pyenv install 3.9.3
-    pyenv global 3.9.3
-    pyenv rehash
-    python3 --version
-    python3 -m ensurepip --upgrade
-    pip3 install pipenv numpy scipy pandas
-
-    # OpenFoam's setEnv.sh script assumes /etc/bashrc to exist, so create it:
-    touch /etc/bashrc
-    echo 'source /opt/openfoam/setEnv.sh' >> $SINGULARITY_ENVIRONMENT
-
-    # Install Texlive
-    # Based on https://github.com/zimmerst/centos-texlive/blob/master/Dockerfile
-    yum -y install perl-Digest-MD5 wget poppler-utils
-    curl -o /tmp/install-tl-unx.tar.gz ftp://ftp.fu-berlin.de/tex/CTAN/systems/texlive/tlnet/install-tl-unx.tar.gz
-    cd /tmp/
-    tar xzf install-tl-unx.tar.gz
-    rm install-tl-unx.tar.gz
-    bash -c "cd /tmp/install-tl-* && ./install-tl -profile /texlive.profile -no-verify-downloads -persistent-downloads"
-
-    echo 'export PATH=/usr/local/texlive/bin/x86_64-linux:$PATH' >> $SINGULARITY_ENVIRONMENT
-    echo 'export MANPATH=/usr/local/texlive/texmf-dist/doc/man:$MANPATH' >> $SINGULARITY_ENVIRONMENT
-    echo 'export INFOPATH=/usr/local/texlive/texmf-dist/doc/info:$INFOPATH' >> $SINGULARITY_ENVIRONMENT
-
-    export PATH=/usr/local/texlive/bin/x86_64-linux:$PATH
-    # Install individual additional packages (saves a lot of diskspace compared to using the next 'level' of `install-tl`):
-    tlmgr install csquotes
-    tlmgr install ucs  # for utf8x.def, expected by Matplotlib
-    tlmgr install type1cm cm-super dvipng  # sometimes expected by Matplotlib
-    tlmgr install pgf xcolor
+#    # Install Texlive
+#    # Based on https://github.com/zimmerst/centos-texlive/blob/master/Dockerfile
+#    yum -y install perl-Digest-MD5 wget poppler-utils
+#    curl -o /tmp/install-tl-unx.tar.gz http://ftp.acc.umu.se/mirror/CTAN/systems/texlive/tlnet/install-tl-unx.tar.gz
+#    cd /tmp/
+#    tar xzf install-tl-unx.tar.gz
+#    rm install-tl-unx.tar.gz
+#    bash -c "cd /tmp/install-tl-* && ./install-tl -profile /tmp/texlive.profile -no-verify-downloads -persistent-downloads"
+#
+#    echo 'export PATH=/usr/local/texlive/bin/x86_64-linux:$PATH' >> $SINGULARITY_ENVIRONMENT
+#    echo 'export MANPATH=/usr/local/texlive/texmf-dist/doc/man:$MANPATH' >> $SINGULARITY_ENVIRONMENT
+#    echo 'export INFOPATH=/usr/local/texlive/texmf-dist/doc/info:$INFOPATH' >> $SINGULARITY_ENVIRONMENT
+#
+#    export PATH=/usr/local/texlive/bin/x86_64-linux:$PATH
+#    # Install individual additional packages (saves a lot of diskspace compared to using the next 'level' of `install-tl`):
+#    tlmgr install csquotes
+#    tlmgr install ucs  # for utf8x.def, expected by Matplotlib
+#    tlmgr install type1cm cm-super dvipng  # sometimes expected by Matplotlib
+#    tlmgr install pgf xcolor
 
     # The following is required for Qt applications such as ParaView
     # to accept keyboard inputs.
@@ -144,7 +141,7 @@ From: openfoamplus/of_v2012_centos73:release
     #  singularity instance start cases.sif my-cases-instance
     echo "Startscript"
 
-# %test
+%test
 
 %labels
     Author ccs-labs.org
